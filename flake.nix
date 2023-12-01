@@ -24,6 +24,7 @@
             lua5_4
             stylua
             lua-language-server
+            tokei
           ];
         };
       }
