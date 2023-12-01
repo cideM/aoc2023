@@ -37,8 +37,8 @@
 Copy the code (Linux & MacOS)...
 
 ```
-$ cat code | sed 's/^/    /' | xsel -b`
-$ cat code | sed 's/^/    /' | pbcopy`
+$ cat code | sed 's/^/    /' | xsel -b
+$ cat code | sed 's/^/    /' | pbcopy
 ```
 
 ...and turn it into a message:
