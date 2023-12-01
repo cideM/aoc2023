@@ -30,27 +30,26 @@
 | 24  | :zzz:  |
 | 25  | :zzz:  |
 
-## Misc
+## Make Reddit Code Snippet
 
-### Post Code on Reddit
-
-Copy the code (Linux & MacOS)...
+For longer code snippets, use https://topaz.github.io/paste/. If it's short enough, do this:
 
 ```
 $ cat code | sed 's/^/    /' | xsel -b
 $ cat code | sed 's/^/    /' | pbcopy
 ```
 
-...and turn it into a message:
+## Reddit Comment Template
 
 ```text
 # [Lua]()
 
 60 lines of code according to `tokei` when formatted with `stylua`.
 
-[GitHub Repository](https://github.com/cideM/aoc2023)
+- [GitHub Repository](https://github.com/cideM/aoc2023)
+- [Topaz Paste]()
 ```
 
-### Disable Copilot
+## Disable Copilot
 
 Add `set exrc` to your Neovim configuration, then `echo 'let g:copilot_enabled=v:false' > .nvimrc`, open the file and `:trust` it.
