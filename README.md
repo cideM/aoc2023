@@ -42,6 +42,8 @@ $ cat code | sed 's/^/    /' | pbcopy
 ## Reddit Comment Template
 
 ```text
+[LANGUAGE: lua]
+
 # [Lua]()
 
 60 lines of code according to `tokei` when formatted with `stylua`.
