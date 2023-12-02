@@ -1,11 +1,11 @@
 # :christmas_tree: Advent of Code 2023 :santa:
 
-## Progress (1/25)
+## Progress (2/25)
 
 |     | Lua    |
 | --- | ------ |
 | 1   | :bell: |
-| 2   | :zzz: |
+| 2   | :bell: |
 | 3   | :zzz: |
 | 4   | :zzz:  |
 | 5   | :zzz:  |
