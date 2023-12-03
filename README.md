@@ -1,5 +1,11 @@
 # :christmas_tree: Advent of Code 2023 :santa:
 
+## Quickstart
+
+```shell
+$ fd . --no-hidden --no-ignore | entr -c -s 'lua d6/main.lua < d6/input.txt'
+```
+
 ## Progress (3/25)
 
 |     | Lua    |
