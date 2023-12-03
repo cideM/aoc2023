@@ -10,58 +10,76 @@ local function unkey(s)
 	return x, y
 end
 
-local y = 1
-for line in io.lines() do
-	local x = 1
-	for c in line:gmatch(".") do
-		GRID[key(x, y)] = c
-		if c ~= "." and not tonumber(c) then
-			SYMBOLS[key(x, y)] = c
+-- Build the grid and remember the symbol locations
+do
+	local y = 1
+	for line in io.lines() do
+		local x = 1
+		for c in line:gmatch(".") do
+			GRID[key(x, y)] = c
+			if c ~= "." and not tonumber(c) then
+				SYMBOLS[key(x, y)] = c
+			end
+			x = x + 1
 		end
-		x = x + 1
+		y = y + 1
 	end
-	y = y + 1
 end
 
 local SEEN = {}
-for k, sym in pairs(SYMBOLS) do
-	local x, y = unkey(k)
-	local part_nums = {}
-	for _, xy in ipairs({
-		{ x - 1, y - 1 },
-		{ x - 1, y },
-		{ x - 1, y + 1 },
-		{ x, y - 1 },
-		{ x, y },
-		{ x, y + 1 },
-		{ x + 1, y - 1 },
-		{ x + 1, y },
-		{ x + 1, y + 1 },
-	}) do
-		local x2, y2 = table.unpack(xy)
-		local k2 = key(x2, y2)
-		if tonumber(GRID[k2]) and not SEEN[k2] then
-			local digits = {}
-			local xcur = x2
-			while tonumber(GRID[key(xcur, y2)]) do
-				xcur = xcur - 1
-			end
-			xcur = xcur + 1
-			while tonumber(GRID[key(xcur, y2)]) do
-				local k3 = key(xcur, y2)
-				SEEN[k3] = true
-				table.insert(digits, GRID[k3])
-				xcur = xcur + 1
-			end
+for k_sym, sym in pairs(SYMBOLS) do
+	-- build_number first goes left until it runs out of numbers,
+	-- and then it goes right to find the full number
+	-- . . . 5 4 [2] 1 2
+	--            ^-- you are here
+	-- 1. Go to the start
+	-- . . . [5] 4 2 1 2
+	--        ^-- you are now here
+	-- 2. Go to the end while tracking the digits
+	-- . . . 5 4 2 1 2 []
+	--       ^ ^ ^ ^ ^  ^-- you are here
+	local build_number = function(k)
+		local x, y = unkey(k)
+		local digits = {}
+		while tonumber(GRID[key(x, y)]) do
+			x = x - 1
+		end
+		x = x + 1
+		while tonumber(GRID[key(x, y)]) do
+			SEEN[key(x, y)] = true
+			table.insert(digits, GRID[key(x, y)])
+			x = x + 1
+		end
 
-			local n = tonumber(table.concat(digits))
-			table.insert(part_nums, n)
+		local n = tonumber(table.concat(digits))
+		return n
+	end
+
+	local x_sym, y_sym = unkey(k_sym)
+	local adjacent_numbers = {}
+	for _, p in ipairs({
+		{ x_sym - 1, y_sym - 1 },
+		{ x_sym - 1, y_sym },
+		{ x_sym - 1, y_sym + 1 },
+		{ x_sym, y_sym - 1 },
+		{ x_sym, y_sym },
+		{ x_sym, y_sym + 1 },
+		{ x_sym + 1, y_sym - 1 },
+		{ x_sym + 1, y_sym },
+		{ x_sym + 1, y_sym + 1 },
+	}) do
+		local x, y = table.unpack(p)
+		local k = key(x, y)
+		-- We can visit the same digit from multiple symbols (I guess?),
+		-- so we need to track what we've seen so far
+		if tonumber(GRID[k]) and not SEEN[k] then
+			local n = build_number(k)
+			table.insert(adjacent_numbers, n)
 			P1 = P1 + n
-			SEEN[k2] = true
 		end
 	end
-	if sym == "*" and #part_nums == 2 then
-		local a, b = table.unpack(part_nums)
+	if sym == "*" and #adjacent_numbers == 2 then
+		local a, b = table.unpack(adjacent_numbers)
 		P2 = P2 + a * b
 	end
 end
