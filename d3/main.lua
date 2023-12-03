@@ -1,3 +1,4 @@
+-- Completed in 54m19s0 with about 30s for part 2
 local SYMBOLS, GRID, P1, P2 = {}, {}, 0, 0
 
 local function key(x, y)
