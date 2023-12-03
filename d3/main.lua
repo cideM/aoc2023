@@ -57,25 +57,17 @@ for k_sym, sym in pairs(SYMBOLS) do
 
 	local x_sym, y_sym = unkey(k_sym)
 	local adjacent_numbers = {}
-	for _, p in ipairs({
-		{ x_sym - 1, y_sym - 1 },
-		{ x_sym - 1, y_sym },
-		{ x_sym - 1, y_sym + 1 },
-		{ x_sym, y_sym - 1 },
-		{ x_sym, y_sym },
-		{ x_sym, y_sym + 1 },
-		{ x_sym + 1, y_sym - 1 },
-		{ x_sym + 1, y_sym },
-		{ x_sym + 1, y_sym + 1 },
-	}) do
-		local x, y = table.unpack(p)
-		local k = key(x, y)
-		-- We can visit the same digit from multiple symbols (I guess?),
-		-- so we need to track what we've seen so far
-		if tonumber(GRID[k]) and not SEEN[k] then
-			local n = build_number(k)
-			table.insert(adjacent_numbers, n)
-			P1 = P1 + n
+	for _, dx in ipairs({ -1, 0, 1 }) do
+		for _, dy in ipairs({ -1, 0, 1 }) do
+			local x, y, k = x_sym + dx, y_sym + dy
+			local k = key(x, y)
+			-- We can visit the same digit from multiple symbols (I guess?),
+			-- so we need to track what we've seen so far
+			if tonumber(GRID[k]) and not SEEN[k] then
+				local n = build_number(k)
+				table.insert(adjacent_numbers, n)
+				P1 = P1 + n
+			end
 		end
 	end
 	if sym == "*" and #adjacent_numbers == 2 then
