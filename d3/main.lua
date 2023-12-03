@@ -39,19 +39,15 @@ for k_sym, sym in pairs(SYMBOLS) do
 	-- . . . 5 4 2 1 2 []
 	--       ^ ^ ^ ^ ^  ^-- you are here
 	local build_number = function(k)
-		local x, y = unkey(k)
-		local digits = {}
-		while tonumber(GRID[key(x, y)]) do
+		local n, x, y = 0, unkey(k)
+		while tonumber(GRID[key(x - 1, y)]) do
 			x = x - 1
 		end
-		x = x + 1
 		while tonumber(GRID[key(x, y)]) do
 			SEEN[key(x, y)] = true
-			table.insert(digits, GRID[key(x, y)])
-			x = x + 1
+			n, x = n * 10 + tonumber(GRID[key(x, y)]), x + 1
 		end
 
-		local n = tonumber(table.concat(digits))
 		return n
 	end
 
@@ -59,7 +55,7 @@ for k_sym, sym in pairs(SYMBOLS) do
 	local adjacent_numbers = {}
 	for _, dx in ipairs({ -1, 0, 1 }) do
 		for _, dy in ipairs({ -1, 0, 1 }) do
-			local x, y, k = x_sym + dx, y_sym + dy
+			local x, y = x_sym + dx, y_sym + dy
 			local k = key(x, y)
 			-- We can visit the same digit from multiple symbols (I guess?),
 			-- so we need to track what we've seen so far
