@@ -1,3 +1,4 @@
+-- completed in 55m30s74
 local P1, P2, CARDS, CACHE = 0, 0, {}, {}
 for line in io.lines() do
 	local id, delim_start, win_ids = tonumber(line:match("(%d+)")), line:find("|"), {}
