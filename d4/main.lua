@@ -1,5 +1,4 @@
 -- completed in 55m30s74
-
 local P1, P2, CARDS = 0, 0, {}
 for line in io.lines() do
 	local id, delim_start, matches = tonumber(line:match("(%d+)")), line:find("|"), 0
@@ -15,8 +14,7 @@ for line in io.lines() do
 			-- one copy). If card 2 spawns 2 cards, and itself
 			-- appears twice, then cards 3 and 4 both appear 3
 			-- times: once as originals, and twice as copies.
-			CARDS[id + 1 + matches] = (CARDS[id + 1 + matches] or 0) + CARDS[id]
-			matches = matches + 1
+			CARDS[id + 1 + matches], matches = (CARDS[id + 1 + matches] or 0) + CARDS[id], matches + 1
 		end
 	end
 	P1, P2 = P1 + (matches == 0 and 0 or 2 ^ (matches - 1)), P2 + CARDS[id]
