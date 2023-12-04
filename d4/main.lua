@@ -6,10 +6,15 @@ for line in io.lines() do
 	CARDS[id] = (CARDS[id] or 0) + 1
 
 	-- Go through the numbers after the | and check if they can be found
-	-- in the part of the line before |. For each match, add another
-	-- card ID to the list of cards spawned by the current card.
+	-- in the part of the line before |.
 	for d in line:gmatch("%d+", delim_start) do
 		if line:sub(1, delim_start):match(" " .. d .. " ") then
+			-- Each card adds at least 1 (itself) to the total
+			-- number of cards. If card 1 spawns 2 cards,
+			-- then cards 2 and 3 both occur twice (original +
+			-- one copy). If card 2 spawns 2 cards, and itself
+			-- appears twice, then cards 3 and 4 both appear 3
+			-- times: once as originals, and twice as copies.
 			CARDS[id + 1 + matches] = (CARDS[id + 1 + matches] or 0) + CARDS[id]
 			matches = matches + 1
 		end
