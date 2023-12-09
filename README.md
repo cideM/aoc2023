@@ -6,7 +6,7 @@
 $ fd . --no-hidden --no-ignore | entr -c -s 'lua d6/main.lua < d6/input.txt'
 ```
 
-## Progress (8/25)
+## Progress (9/25)
 
 |     | Lua    |
 | --- | ------ |
@@ -18,7 +18,7 @@ $ fd . --no-hidden --no-ignore | entr -c -s 'lua d6/main.lua < d6/input.txt'
 | 6   | :bell:  |
 | 7   | :bell:  |
 | 8   | :bell:  |
-| 9   | :zzz:  |
+| 9   | :bell:  |
 | 10  | :zzz:  |
 | 11  | :zzz:  |
 | 12  | :zzz:  |
