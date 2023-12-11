@@ -1,6 +1,3 @@
--- part 1 42m 34s 16ms
-local GRID, LOOP, CACHE = {}, {}, {}
-
 local function key(x, y)
 	return string.format("%d;%d", x, y)
 end
@@ -11,7 +8,7 @@ local function unkey(s)
 end
 
 -- 1. Parse the input and build the grid
-local S = nil
+local S, GRID = nil, {}
 do
 	local y = 1
 	for line in io.lines() do
@@ -26,14 +23,15 @@ do
 end
 assert(S, "S wasn't found")
 
--- 2. Replace S with a pipe
+-- 2. Replace S with a pipe using a map of patterns (~ regular expressions)
+--    to the actual value of S. The patterns are left, up, right, down
 do
 	-- stylua: ignore
 	local S_to_pipe = {["^%-..|$"] = "7", ["^..%-J$"] = "F", ["^%-|..$"] = "J",
 		["^.77.$"] = "L", ["^F7..$"] = "J", ["^.7.|$"] = "F", ["^.7.J$"] = "F",
 		["^%-F..$"] = "J", ["^L.J.$"] = "-", ["^L7..$"] = "J", ["^%-.7.$"] = "-",
-		["^..J|$"] = "F", ["^.|.|$"] = "F", ["^..7J$"] = "F", ["^%-..J$"] = "7",
-		["^.|.J$"] = "F", ["^.|.L$"] = "F", ["^.J.|$"] = "F", ["^.|7.$"] = "L",
+		["^..J|$"] = "F", ["^.|.|$"] = "|", ["^..7J$"] = "F", ["^%-..J$"] = "7",
+		["^.|.J$"] = "|", ["^.|.L$"] = "|", ["^.J.|$"] = "F", ["^.|7.$"] = "L",
 		["^.J.L$"] = "F", ["^.7.L$"] = "F", ["^.|%-.$"] = "L", ["^L..|$"] = "7",
 		["^.7%-.$"] = "L", ["^.F%-.$"] = "L", ["^F..L$"] = "7", ["^.|J.$"] = "L",
 		["^..JL$"] = "F", ["^FF..$"] = "J", ["^..%-|$"] = "F", ["^L|..$"] = "J",
@@ -45,6 +43,8 @@ do
 		["^.F7.$"] = "L", ["^%-.%-.$"] = "-", ["^..7L$"] = "F"}
 
 	local x, y = unkey(S)
+	-- Convert the left, up, right, down pipes into a single
+	-- string that we pattern match against.
 	local adjacent = table.concat({
 		GRID[key(x - 1, y)] or "?",
 		GRID[key(x, y - 1)] or "?",
@@ -60,6 +60,8 @@ end
 assert(GRID[S] ~= "S", "S wasn't replaced")
 
 local function adjacent(k)
+	-- Convert each pipe into the vectors that convert the current
+	-- position into the two possible neighbours.
 	-- stylua: ignore
 	local m = {["|"] = {{ 0, 1 }, { 0,-1 }}, ["F"] = {{ 0, 1 }, { 1, 0 }},
 		       ["J"] = {{ 0,-1 }, {-1, 0 }}, ["-"] = {{-1, 0 }, { 1, 0 }},
@@ -77,78 +79,34 @@ local function adjacent(k)
 	return out
 end
 
--- Calculate the distance from S for each pipe in the loop
+-- Calculate the distance from S for each pipe in the loop. The maximum number
+-- is the solution to part 1. But while doing this we'll also keep track of
+-- some data for part 2:
+-- * Find the top edge. We'll then start walking the loop from that edge in a
+--   fixed direction so we can be sure that we're walking clockwise.
+-- * Track the loop length and which grid coordinates are loop tiles
+local TOP_EDGE, LOOP_LEN, LOOP = key(math.maxinteger, math.maxinteger), 0, {}
 do
 	local distances, queue, max = { [S] = 0 }, { S }, math.mininteger
 	while #queue > 0 do
 		local cur = table.remove(queue, 1)
+		LOOP[cur] = true
+		LOOP_LEN = LOOP_LEN + 1
 		for _, other in ipairs(adjacent(cur)) do
+			local _, y = unkey(other)
+			local _, top_y = unkey(TOP_EDGE)
+			if y < top_y then
+				TOP_EDGE = other
+			end
+
 			if not distances[other] then
 				table.insert(queue, other)
-				distances[other] =  distances[cur] + 1
+				distances[other] = distances[cur] + 1
 				max = math.max(max, distances[other])
 			end
 		end
 	end
-	print("P1", max)
-end
-
-os.exit()
-
-local loop_end = nil
-local max = math.mininteger
-for k, v in pairs(dists) do
-	if v > max then
-		max = v
-		loop_end = k
-	end
-end
-
-local qrev, seen = { loop_end }, { loop_end }
-while #qrev > 0 do
-	local cur = table.remove(qrev, 1)
-	for _, k in ipairs(adjacent(cur)) do
-		if not seen[k] then
-			seen[k] = true
-			table.insert(qrev, k)
-			LOOP[k] = true
-		end
-	end
-end
-
-local steps, len, vec = {}, 0, { 0, 1 }
-local min_x = math.maxinteger
-for k in pairs(LOOP) do
-	local x, y = unkey(k)
-	if GRID[k] == "|" then
-		if x < min_x then
-			min_x = x
-			steps = { k }
-			vec = { 0, 1 }
-		end
-	end
-	if GRID[k] == "F" then
-		if x < min_x then
-			min_x = x
-			steps = { k }
-			vec = { -1, 0 }
-		end
-	end
-	if GRID[k] == "L" then
-		if x < min_x then
-			min_x = x
-			steps = { k }
-			vec = { 0, 1 }
-		end
-	end
-	if GRID[k] == "J" then
-		if x < min_x then
-			min_x = x
-			steps = { k }
-			vec = { 0, 1 }
-		end
-	end
-	len = len + 1
+	print(max)
 end
 
 local function rotate_left(vec2)
@@ -161,69 +119,56 @@ local function rotate_right(vec2)
 	return { -1 * y, x }
 end
 
-while #steps <= len do
-	local cur = steps[#steps]
-	local x, y = unkey(cur)
-	local v = assert(GRID[cur], cur)
-	local vecs = table.concat(vec, ",")
-	local orig_vec = vec
-	if v == "J" then
-		if vecs == "1,0" then
-			vec = rotate_left(vec)
-		elseif vecs == "0,1" then
-			vec = rotate_right(vec)
-		end
-	elseif v == "7" then
-		if vecs == "1,0" then
-			vec = rotate_right(vec)
-		elseif vecs == "0,-1" then
-			vec = rotate_left(vec)
-		end
-	elseif v == "F" then
-		if vecs == "-1,0" then
-			vec = rotate_left(vec)
-		elseif vecs == "0,-1" then
-			vec = rotate_right(vec)
-		end
-	elseif v == "L" then
-		if vecs == "-1,0" then
-			vec = rotate_right(vec)
-		elseif vecs == "0,1" then
-			vec = rotate_left(vec)
-		end
-	end
-	LOOP[cur] = { orig_vec, vec }
-	table.insert(steps, key(x + vec[1], y + vec[2]))
+-- stylua: ignore
+local direction_changes = {["J1,0"] = rotate_left, ["J0,1"] = rotate_right,
+	["71,0"] = rotate_right, ["70,-1"] = rotate_left, ["F-1,0"] = rotate_left,
+	["F0,-1"] = rotate_right, ["L-1,0"] = rotate_right, ["L0,1"] = rotate_left}
+
+-- The remaining code walks the loop clockwise. At each step we look to our
+-- right (towards the enclosure) and keep track of the tiles on our right.
+-- Why plural? Because at each step we possibly change direction. So we
+-- look to our right before changing direction, and after changing direction
+-- but *before* making the next step. If only look to your right before or
+-- after you will miss some tiles.
+-- Doing this gives us a list of tiles that are immediately on our right hand
+-- side. We can then use a flood fill algorithm to recursively mark these
+-- tiles on our right as enclosed. Once we've visited every node once
+-- (recursively!) we've arrived at the total number of enclosed tiles.
+
+local position, vector, to_my_right, steps = TOP_EDGE, { 1, 0 }, {}, 0
+while steps <= LOOP_LEN do
+	local fn = direction_changes[GRID[position] .. table.concat(vector, ",")]
+	local before, after = vector, fn and fn(vector) or vector
+
+	local x, y = unkey(position)
+	local dx, dy = table.unpack(rotate_right(before))
+	to_my_right[key(x + dx, y + dy)] = true
+
+	local dx2, dy2 = table.unpack(rotate_right(after))
+	to_my_right[key(x + dx2, y + dy2)] = true
+
+	position, vector, steps = key(x + after[1], y + after[2]), after, steps + 1
 end
 
-local Q, seen = {}, {}
-for _, step in ipairs(steps) do
-	local x, y = unkey(step)
-	for _, v in ipairs(LOOP[step]) do
-		local vec2 = rotate_left(v)
-		local x2, y2 = x + vec2[1], y + vec2[2]
-		local kk = key(x2, y2)
-		if not LOOP[kk] and GRID[kk] and not seen[kk] then
-			table.insert(Q, kk)
-			seen[kk] = true
-		end
-	end
+local queue, seen, p2 = {}, {}, 0
+for k in pairs(to_my_right) do
+	table.insert(queue, k)
 end
 
-while #Q > 0 do
-	local cur = table.remove(Q, 1)
-	CACHE[cur] = true
+while #queue > 0 do
+	local cur = table.remove(queue, 1)
+	if LOOP[cur] or seen[cur] then
+		goto continue
+	end
+
+	p2, seen[cur] = p2 + 1, true
 	local x, y = unkey(cur)
-	for _, vec2 in ipairs({ { -1, 0 }, { 0, -1 }, { 1, 0 }, { 0, 1 } }) do
-		local x2, y2 = x + vec2[1], y + vec2[2]
-		local kk = key(x2, y2)
-		if not LOOP[kk] and not CACHE[kk] then
-			table.insert(Q, kk)
+	for _, vec in ipairs({ { -1, 0 }, { 0, -1 }, { 1, 0 }, { 0, 1 } }) do
+		local k = key(x + vec[1], y + vec[2])
+		if not LOOP[k] and not seen[k] then
+			table.insert(queue, k)
 		end
 	end
+	::continue::
 end
-local p2 = 0
-for _ in pairs(CACHE) do
-	p2 = p2 + 1
-end
-print("P2", p2)
+print(p2)
