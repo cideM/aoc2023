@@ -20,8 +20,8 @@
             coreutils
             moreutils
             jq
-            alejandra
             lua5_4
+			luajit
             stylua
             lua-language-server
             tokei

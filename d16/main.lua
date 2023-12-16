@@ -13,7 +13,8 @@ local function simulate(Q)
 	Q = Q or {}
 	local seen, visited = {}, {}
 	while #Q > 0 do
-		local x, y, dx, dy = table.unpack(table.remove(Q, 1))
+		local cur = table.remove(Q, 1)
+		local x, y, dx, dy = cur[1], cur[2], cur[3], cur[4]
 
 		local key = table.concat({ x, y, dx, dy }, ";")
 		if seen[key] or x < 1 or x > max_x or y < 1 or y > max_y then
