@@ -10,7 +10,7 @@ end
 function Heap:bubbleup(pos)
 	while pos > 1 do
 		local parent = math.floor(pos / 2)
-		if not (self[pos].f_score < self[parent].f_score) then
+		if not (self[pos].score < self[parent].score) then
 			break
 		end
 		self[parent], self[pos] = self[pos], self[parent]
@@ -21,10 +21,9 @@ end
 function Heap:sink(pos)
 	local last = #self
 	while true do
-		local min = pos
-		local child = pos * 2
+		local min, child = pos, pos * 2
 		for c = child, child + 1 do
-			if c <= last and self[c].f_score < self[min].f_score then
+			if c <= last and self[c].score < self[min].score then
 				min = c
 			end
 		end
@@ -35,15 +34,6 @@ function Heap:sink(pos)
 		self[pos], self[min] = self[min], self[pos]
 		pos = min
 	end
-end
-
-function Heap:has(value)
-	for _, v in ipairs(self) do
-		if v == value then
-			return true
-		end
-	end
-	return false
 end
 
 function Heap:insert(value)
@@ -80,33 +70,27 @@ end
 local max_x, max_y = #G[1], #G
 
 local function solve(min_run, max_run)
-	min_run = min_run or 0
-	max_run = max_run or 3
+	min_run, max_run = min_run or 0, max_run or 3
 	local seen, Q = {}, Heap:new()
-	Q:insert({ key = "1;1;1;0;0", f_score = 0 })
-	Q:insert({ key = "1;1;0;1;0", f_score = 0 }) -- x y dx dy cost straight_line_run
+	Q:insert({ data = { 1, 1, 1, 0, 0 }, score = 0 }) -- x y dx dy cost straight_line_run
+	Q:insert({ data = { 1, 1, 0, 1, 0 }, score = 0 })
 	while #Q > 0 do
 		local cur = Q:remove(1)
-		local x, y, dx, dy, run = cur.key:match("(%-?%d+);(%-?%d+);(%-?%d+);(%-?%d+);(%-?%d+)")
-		x, y, dx, dy, run = tonumber(x), tonumber(y), tonumber(dx), tonumber(dy), tonumber(run)
-		local cost = cur.f_score
+		local x, y, dx, dy, run = cur.data[1], cur.data[2], cur.data[3], cur.data[4], cur.data[5]
 
 		if x == max_x and y == max_y and run >= min_run then
-			return cost
+			return cur.score
 		end
 
-		if seen[cur.key] then
+		if seen[table.concat(cur.data, ";")] then
 			goto continue
 		end
-		seen[cur.key] = true
+		seen[table.concat(cur.data, ";")] = true
 
 		if run < max_run then
 			local x2, y2 = x + dx, y + dy
-			if x2 >= 1 and x2 <= max_x and y2 >= 1 and y2 <= max_y then
-				Q:insert({
-					key = table.concat({ x2, y2, dx, dy, run + 1 }, ";"),
-					f_score = cost + G[y2][x2],
-				})
+			if (G[y2] or {})[x2] ~= nil then
+				Q:insert({ data = { x2, y2, dx, dy, run + 1 }, score = cur.score + G[y2][x2] })
 			end
 
 			if run < min_run then
@@ -117,20 +101,8 @@ local function solve(min_run, max_run)
 		for _, dirs in ipairs({ { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } }) do
 			local dx2, dy2 = dirs[1], dirs[2]
 			local x2, y2 = x + dx2, y + dy2
-			if
-				dx + dx2 ~= 0
-				and dy + dy2 ~= 0
-				and dx2 ~= dx
-				and dy2 ~= dy
-				and x2 >= 1
-				and x2 <= max_x
-				and y2 >= 1
-				and y2 <= max_y
-			then
-				Q:insert({
-					key = table.concat({ x2, y2, dx2, dy2, 1 }, ";"),
-					f_score = cost + G[y2][x2],
-				})
+			if dx + dx2 ~= 0 and dy + dy2 ~= 0 and dx2 ~= dx and dy2 ~= dy and (G[y2] or {})[x2] ~= nil then
+				Q:insert({ data = { x2, y2, dx2, dy2, 1 }, score = cur.score + G[y2][x2] })
 			end
 		end
 
