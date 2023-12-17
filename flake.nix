@@ -6,14 +6,25 @@
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, flake-utils }:
-    flake-utils.lib.eachDefaultSystem (system:
-      let
+  outputs = {
+    self,
+    nixpkgs,
+    flake-utils,
+  }:
+    flake-utils.lib.eachDefaultSystem (
+      system: let
+        overlays = [
+          (self: super: {
+            stylua = super.stylua.override {
+              features = ["lua54"];
+            };
+          })
+        ];
         pkgs = import nixpkgs {
           inherit system;
+		  overlays = overlays;
         };
-      in
-      {
+      in {
         devShell = pkgs.mkShell {
           buildInputs = with pkgs; [
             alejandra
@@ -21,7 +32,7 @@
             moreutils
             jq
             lua5_4
-			luajit
+            luajit
             stylua
             lua-language-server
             tokei
