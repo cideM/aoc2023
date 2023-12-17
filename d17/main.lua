@@ -72,7 +72,7 @@ local max_x, max_y = #G[1], #G
 local function solve(min_run, max_run)
 	min_run, max_run = min_run or 0, max_run or 3
 	local seen, Q = {}, Heap:new()
-	Q:insert({ data = { 1, 1, 1, 0, 0 }, score = 0 }) -- x y dx dy cost straight_line_run
+	Q:insert({ data = { 1, 1, 1, 0, 0 }, score = 0 }) -- x y dx dy run cost
 	Q:insert({ data = { 1, 1, 0, 1, 0 }, score = 0 })
 	while #Q > 0 do
 		local cur = Q:remove(1)
