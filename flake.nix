@@ -29,6 +29,7 @@
           buildInputs = with pkgs; [
             alejandra
             coreutils
+			graphviz
             moreutils
             jq
             lua5_4
