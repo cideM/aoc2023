@@ -34,6 +34,7 @@
             jq
             lua5_4
             luajit
+			nodePackages.prettier
             stylua
             lua-language-server
             tokei

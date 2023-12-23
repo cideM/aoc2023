@@ -1,4 +1,4 @@
-# Advent of Code 2023 :santa: :christmas_tree: 
+# Advent of Code 2023 :santa: :christmas_tree:
 
 ## Quickstart
 
@@ -13,26 +13,26 @@ $ fd . --no-hidden --no-ignore | entr -c -s 'lua d6/main.lua < d6/input.txt'
 | 1   | :bell: |
 | 2   | :bell: |
 | 3   | :bell: |
-| 4   | :bell:  |
-| 5   | :bell:  |
-| 6   | :bell:  |
-| 7   | :bell:  |
-| 8   | :bell:  |
-| 9   | :bell:  |
-| 10  | :bell:  |
-| 11  | :bell:  |
-| 12  | :bell:  |
-| 13  | :bell:  |
-| 14  | :bell:  |
-| 15  | :bell:  |
-| 16  | :bell:  |
-| 17  | :bell:  |
-| 18  | :bell:  |
-| 19  | :bell:  |
-| 20  | :bell:  |
+| 4   | :bell: |
+| 5   | :bell: |
+| 6   | :bell: |
+| 7   | :bell: |
+| 8   | :bell: |
+| 9   | :bell: |
+| 10  | :bell: |
+| 11  | :bell: |
+| 12  | :bell: |
+| 13  | :bell: |
+| 14  | :bell: |
+| 15  | :bell: |
+| 16  | :bell: |
+| 17  | :bell: |
+| 18  | :bell: |
+| 19  | :bell: |
+| 20  | :bell: |
 | 21  | :zzz:  |
 | 22  | :zzz:  |
-| 23  | :bell:  |
+| 23  | :bell: |
 | 24  | :zzz:  |
 | 25  | :zzz:  |
 
