@@ -1,3 +1,5 @@
+-- Couldn't do part two without https://www.reddit.com/r/adventofcode/comments/18q40he/2023_day_24_part_2_a_straightforward_nonsolver/
+
 local function same_dir(v1, v2)
 	return v1[1] * v2[1] >= 0 and v1[2] * v2[2] >= 0
 end
@@ -48,3 +50,73 @@ for i, s1 in ipairs(stones) do
 	end
 end
 print(p1)
+
+local function gaussian_elimination(matrix)
+	local rows = #matrix
+	local cols = #matrix[1] - 1 -- Last column is for the constants
+
+	-- Forward elimination
+	for k = 1, rows do
+		for i = k + 1, rows do
+			local factor = matrix[i][k] / matrix[k][k]
+			for j = k, cols + 1 do
+				matrix[i][j] = matrix[i][j] - factor * matrix[k][j]
+			end
+		end
+	end
+
+	-- Back substitution
+	local solution = {}
+	for i = rows, 1, -1 do
+		local sum = 0
+		for j = i + 1, cols do
+			sum = sum + matrix[i][j] * (solution[j] or 0)
+		end
+		solution[i] = (matrix[i][cols + 1] - sum) / matrix[i][i]
+	end
+
+	return solution
+end
+
+local stones_start, stones_len = 100, 4
+
+local matrix_xy = {}
+
+for i = stones_start, stones_start + stones_len do
+	local s1, s2 = stones[i - 1], stones[i]
+	-- (dy'-dy) X + (dx-dx') Y + (y-y') DX + (x'-x) DY = x' dy' - y' dx' - x dy + y dx
+	local row = {
+		(s2.vel[2] - s1.vel[2]),
+		(s1.vel[1] - s2.vel[1]),
+		(s1.pos[2] - s2.pos[2]),
+		(s2.pos[1] - s1.pos[1]),
+		(s2.pos[1] * s2.vel[2])
+			- (s2.pos[2] * s2.vel[1])
+			- (s1.pos[1] * s1.vel[2])
+			+ (s1.pos[2] * s1.vel[1]),
+	}
+	table.insert(matrix_xy, row)
+end
+
+local x, y = table.unpack(gaussian_elimination(matrix_xy))
+
+local matrix_z = {}
+
+for i = stones_start, stones_start + stones_len do
+	local s1, s2 = stones[i - 1], stones[i]
+	-- (dy'-dy) Z + (dz-dz') Y + (y-y') DZ + (z'-z) DY = z' dy' - y' dz' - z dy + y dz
+	local row = {
+		(s2.vel[2] - s1.vel[2]),
+		(s1.vel[3] - s2.vel[3]),
+		(s1.pos[2] - s2.pos[2]),
+		(s2.pos[3] - s1.pos[3]),
+		(s2.pos[3] * s2.vel[2])
+			- (s2.pos[2] * s2.vel[3])
+			- (s1.pos[3] * s1.vel[2])
+			+ (s1.pos[2] * s1.vel[3]),
+	}
+	table.insert(matrix_z, row)
+end
+
+local z = table.unpack(gaussian_elimination(matrix_z))
+print(string.format("%18.0f", x + y + z))
